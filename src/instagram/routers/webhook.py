@@ -3,27 +3,16 @@ import hmac
 import logging
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from dependency_injector.wiring import inject, Provide
 
-from src.core.config import settings
+from src.core.config.settings import settings
 from src.instagram.handlers.chatbot import ChatbotHandler
 from src.instagram.models.webhook import WebhookPayload
-from src.instagram.repositories.session import SessionRepository
-from src.instagram.services.instagram import InstagramService
+from src.core.di.container import Container
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(tags=["Webhook"])
-
-# Instâncias compartilhadas (singleton simples)
-_service = InstagramService()
-_sessions = SessionRepository()
-_chatbot = ChatbotHandler(service=_service, sessions=_sessions)
-
-
-# ─── Dependências ──────────────────────────────────────────────────────────────
-
-def get_chatbot() -> ChatbotHandler:
-    return _chatbot
 
 
 # ─── Verificação de assinatura HMAC-SHA256 ─────────────────────────────────────
@@ -37,7 +26,7 @@ def _verify_signature(body: bytes, signature_header: str | None) -> bool:
         return False
 
     expected = hmac.new(
-        settings.instagram_app_secret.encode(),
+        settings.instagram.app_secret.encode(),
         body,
         hashlib.sha256,
     ).hexdigest()
@@ -54,7 +43,7 @@ async def verify_webhook(
     hub_verify_token: str = Query(..., alias="hub.verify_token"),
     hub_challenge: str = Query(..., alias="hub.challenge"),
 ):
-    if hub_mode == "subscribe" and hub_verify_token == settings.instagram_verify_token:
+    if hub_mode == "subscribe" and hub_verify_token == settings.instagram.verify_token:
         logger.info("Webhook verificado com sucesso.")
         return int(hub_challenge)
 
@@ -65,9 +54,10 @@ async def verify_webhook(
 # ─── POST /webhook — recebimento de eventos da Meta ───────────────────────────
 
 @router.post("/webhook")
+@inject
 async def receive_webhook(
     request: Request,
-    chatbot: ChatbotHandler = Depends(get_chatbot),
+    chatbot: ChatbotHandler = Depends(Provide[Container.instagram.provided.chatbot_handler]),
 ):
     body = await request.body()
 
@@ -98,9 +88,9 @@ async def receive_webhook(
                 elif messaging.postback:
                     await chatbot.handle_postback(sender_id, messaging.postback.payload)
 
-            except Exception as exc:
-                # Nunca deixe o webhook retornar 5xx, a Meta irá retentar
-                logger.error("Erro ao processar mensagem de %s: %s", sender_id, exc)
+            except Exception as e:
+                logger.exception(f"Erro ao processar mensagem de {sender_id}: {e}")
+                # Não propagar erro para o Facebook não reenviar o webhook infinitamente
+                # mas logar o erro é crítico.
 
-    # A Meta exige resposta 200 em < 5 segundos
-    return {"status": "ok"}
+    return {"status": "processed"}

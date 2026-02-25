@@ -19,10 +19,8 @@ class Container(containers.DeclarativeContainer):
     # Wiring configuration
     wiring_config = containers.WiringConfiguration(
         modules=[
-            "src.instagram.services.instagram_service",
-            "src.instagram.services.instagram_account_service",
-            "src.instagram.services.instagram_webhook_service",
-            "src.instagram.services.webhook.owner_resolver",
+            "src.instagram.routers.instagram",
+            "src.instagram.routers.webhook",
             "src.main",
         ],
     )
@@ -30,4 +28,7 @@ class Container(containers.DeclarativeContainer):
     core = providers.Container(CoreContainer)
 
     # Instagram Module
-    instagram = providers.Container(InstagramContainer)
+    instagram = providers.Container(
+        InstagramContainer,
+        core=core,
+    )

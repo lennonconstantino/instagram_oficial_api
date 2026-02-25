@@ -1,44 +1,34 @@
 from dependency_injector import containers, providers
-
 from src.core.di.modules.core import CoreContainer
-from src.instagram.repositories.impl.supabase_instagram_account_repository import SupabaseInstagramAccountRepository
-from src.instagram.services.instagram_service import InstagramService
-from src.instagram.services.instagram_account_service import InstagramAccountService
-from src.instagram.services.webhook.owner_resolver import InstagramWebhookOwnerResolver
-from src.instagram.services.instagram_webhook_service import InstagramWebhookService
-
-
+from src.instagram.services.instagram import InstagramService
+from src.instagram.repositories.session import SessionRepository
+from src.instagram.handlers.chatbot import ChatbotHandler
+from src.core.config.settings import settings
 
 class InstagramContainer(containers.DeclarativeContainer):
     """
     Instagram Module Container.
     """
-    core = providers.Container(CoreContainer)
+    
+    # Dependência do container core
+    core = providers.DependenciesContainer()
 
     # Repositories
-    instagram_account_repository = providers.Selector(
-        core.db_backend,
-        supabase=providers.Factory(
-            SupabaseInstagramAccountRepository,
-            client=core.supabase_session,
-        ),
+    session_repository = providers.Singleton(
+        SessionRepository,
+        redis_client=core.redis_client
     )
 
     # Services
     instagram_service = providers.Factory(
-        InstagramService, instagram_account_repo=instagram_account_repository
+        InstagramService,
+        base_url=settings.instagram.base_url,
+        token=settings.instagram.access_token,
     )
 
-    instagram_account_service = providers.Factory(
-        InstagramAccountService, repo=instagram_account_repository
-    )
-
-    instagram_webhook_owner_resolver = providers.Factory(
-        InstagramWebhookOwnerResolver, instagram_account_service=instagram_account_service
-    )
-
-    instagram_webhook_service = providers.Factory(
-        InstagramWebhookService,
-        owner_resolver=instagram_webhook_owner_resolver,
-        instagram_service=instagram_service,
+    # Handlers
+    chatbot_handler = providers.Singleton(
+        ChatbotHandler,
+        service=instagram_service,
+        sessions=session_repository,
     )

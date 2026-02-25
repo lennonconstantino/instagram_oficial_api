@@ -1,5 +1,7 @@
 from datetime import datetime
 import redis.asyncio as redis
+from typing import Optional
+
 from src.instagram.models.webhook import UserSession
 from src.core.config.settings import settings
 
@@ -9,14 +11,18 @@ class SessionRepository:
     Repositório de sessões usando Redis.
     """
 
-    def __init__(self):
-        self._redis = redis.Redis(
-            host=settings.redis.host,
-            port=settings.redis.port,
-            password=settings.redis.password,
-            db=settings.redis.db,
-            decode_responses=True
-        )
+    def __init__(self, redis_client: Optional[redis.Redis] = None):
+        # Permite injeção de dependência ou fallback para configuração padrão
+        if redis_client:
+            self._redis = redis_client
+        else:
+            self._redis = redis.Redis(
+                host=settings.redis.host,
+                port=settings.redis.port,
+                password=settings.redis.password,
+                db=settings.redis.db,
+                decode_responses=True
+            )
         self._ttl = 86400  # 24h
 
     async def get(self, user_id: str) -> UserSession:

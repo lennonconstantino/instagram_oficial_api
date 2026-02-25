@@ -1,7 +1,7 @@
 import httpx
 from typing import Optional
 
-from src.core.config import settings
+from src.core.config.settings import settings as app_settings
 from src.instagram.models.webhook import InstagramProfile, InstagramMedia, PaginatedMedia
 
 
@@ -11,10 +11,15 @@ class InstagramService:
     a Messenger/Send API (envio de DMs via webhook).
     """
 
-    def __init__(self):
-        self.base_url = settings.base_url
-        self.token = settings.instagram_access_token
-        self.client = httpx.AsyncClient(timeout=30)
+    def __init__(
+        self,
+        base_url: str = app_settings.instagram.base_url,
+        token: str = app_settings.instagram.access_token,
+        client: Optional[httpx.AsyncClient] = None,
+    ):
+        self.base_url = base_url
+        self.token = token
+        self.client = client or httpx.AsyncClient(timeout=30)
 
     # ─── Helpers ──────────────────────────────────────────────────────────────
 
