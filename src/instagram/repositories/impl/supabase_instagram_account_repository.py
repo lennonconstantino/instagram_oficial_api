@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import Optional
 
 from src.core.database.interface import IDatabaseSession
 from src.core.database.supabase_async_repository import SupabaseAsyncRepository
@@ -23,11 +23,12 @@ class SupabaseInstagramAccountRepository(SupabaseAsyncRepository[InstagramAccoun
     async def get_by_id(self, account_id: str) -> Optional[InstagramAccount]:
         return await self.find_by_id(account_id)
 
-    async def get_by_owner_id(self, owner_id: str) -> List[InstagramAccount]:
-        return await self.find_by({"owner_id": owner_id})
+    async def get_by_owner_id(self, owner_id: str) -> Optional[InstagramAccount]:
+        results = await self.find_by({"owner_id": owner_id})
+        return results[0] if results else None
 
-    async def get_by_instagram_business_account_id(self, business_account_id: str) -> Optional[InstagramAccount]:
-        results = await self.find_by({"instagram_business_account_id": business_account_id})
+    async def get_by_api_id(self, api_id: str) -> Optional[InstagramAccount]:
+        results = await self.find_by({"api_id": api_id})
         return results[0] if results else None
 
     async def get_by_phone_number(self, phone_number: str) -> Optional[InstagramAccount]:

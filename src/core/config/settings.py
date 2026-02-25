@@ -72,29 +72,6 @@ class SupabaseSettings(BaseSettings):
         extra="ignore"
     )
 
-
-class MetaSettings(BaseSettings):
-    """Default Meta settings (can be overridden per owner)."""
-
-    bearer_token_access: str | None = Field(default=None, description="Meta Bearer Token Access")
-    verification_token: str | None = Field(default=None, description="Meta Verification Token")
-    phone_number_id: str | None = Field(
-        default=None, description="Meta Phone Number ID"
-    )
-    version_api: str | None = Field(default=None, description="Meta Version API")
-    phone_number: str | None = Field(default=None, description="Meta Phone Number (owner)")
-    business_account_id: str | None = Field(
-        default=None, description="Meta Business Account ID"
-    )
-
-    model_config = SettingsConfigDict(
-        env_prefix="META_",
-        env_file=".env",
-        env_file_encoding="utf-8",
-        case_sensitive=False,
-        extra="ignore"
-    )
-
 class InstagramSettings(BaseSettings):
     """Instagram settings."""
 

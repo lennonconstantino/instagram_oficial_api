@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import List, Optional
+from typing import Optional
 
 from src.instagram.models.instagram_account import InstagramAccount
 
@@ -15,15 +15,16 @@ class InstagramAccountRepository(ABC):
 
 
     @abstractmethod
-    async def get_by_owner_id(self, owner_id: str) -> List[InstagramAccount]:
+    async def get_by_owner_id(self, owner_id: str) -> Optional[InstagramAccount]:
         ...
 
-    @abstractmethod
-    async def get_by_instagram_business_account_id(self, business_account_id: str) -> Optional[InstagramAccount]:
-        ...
 
     @abstractmethod
     async def get_by_phone_number(self, phone_number: str) -> Optional[InstagramAccount]:
+        ...
+        
+    @abstractmethod
+    async def get_by_api_id(self, api_id: str) -> Optional[InstagramAccount]:
         ...
 
     @abstractmethod
