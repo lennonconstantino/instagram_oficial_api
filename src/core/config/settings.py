@@ -78,6 +78,8 @@ class InstagramSettings(BaseSettings):
     access_token: str | None = Field(default=None, description="Instagram Access Token")
     app_id: str | None = Field(default=None, description="Instagram App ID")
     app_secret: str | None = Field(default=None, description="Instagram App Secret")
+    user_id: str | None = Field(default=None, description="Instagram User ID")
+    page_id: str | None = Field(default=None, description="Instagram Page ID")
     verify_token: str | None = Field(default=None, description="Instagram Verify Token")
     api_version: str | None = Field(default=None, description="Instagram API Version")
 
