@@ -1,11 +1,11 @@
 import httpx
-import logging
 from typing import Optional
 
 from src.core.config.settings import settings as app_settings
 from src.instagram.models.webhook import InstagramProfile, InstagramMedia, PaginatedMedia
+from src.core.utils.logging import get_logger
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class InstagramService:

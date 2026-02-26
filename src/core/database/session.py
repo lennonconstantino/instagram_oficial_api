@@ -3,15 +3,15 @@ Database connection utilities.
 Handles Supabase client initialization and management.
 """
 
-import logging
 from typing import Any, Optional
 
 from supabase import Client, ClientOptions, create_client
 
 from src.core.config.settings import settings
 from src.core.database.interface import IDatabaseSession
+from src.core.utils.logging import get_logger
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class SupabaseSession(IDatabaseSession):

@@ -1,6 +1,5 @@
 import hashlib
 import hmac
-import logging
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from dependency_injector.wiring import inject, Provide
@@ -9,8 +8,9 @@ from src.core.config.settings import settings
 from src.instagram.handlers.chatbot import ChatbotHandler
 from src.instagram.models.webhook import WebhookPayload
 from src.core.di.container import Container
+from src.core.utils.logging import get_logger
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 router = APIRouter(tags=["Webhook"])
 

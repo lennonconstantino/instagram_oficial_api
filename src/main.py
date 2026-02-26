@@ -1,5 +1,3 @@
-import logging
-
 from dotenv import load_dotenv
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
@@ -9,11 +7,9 @@ from src.core.di.container import Container
 from src.instagram.routers.webhook import router as webhook_router
 from src.instagram.routers.instagram import router as instagram_router
 from src.instagram.routers.health import router as health_router
+from src.core.utils.logging import get_logger
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
-)
+logger = get_logger(__name__)
 
 
 @asynccontextmanager
@@ -21,9 +17,9 @@ async def lifespan(app: FastAPI):
     # Inicializa o container de injeção de dependência
     container = Container()
     app.container = container
-    logging.getLogger(__name__).info("Instagram API iniciada.")
+    logger.info("Instagram API iniciada.")
     yield
-    logging.getLogger(__name__).info("Instagram API encerrada.")
+    logger.info("Instagram API encerrada.")
 
 
 app = FastAPI(
