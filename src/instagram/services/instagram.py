@@ -1,8 +1,11 @@
 import httpx
+import logging
 from typing import Optional
 
 from src.core.config.settings import settings as app_settings
 from src.instagram.models.webhook import InstagramProfile, InstagramMedia, PaginatedMedia
+
+logger = logging.getLogger(__name__)
 
 
 class InstagramService:
@@ -19,30 +22,50 @@ class InstagramService:
     ):
         self.base_url = base_url
         self.token = token
-        self.client = client or httpx.AsyncClient(timeout=30)
+        # Usa Bearer Token para não expor a credencial na URL (logs)
+        headers = {"Authorization": f"Bearer {token}"}
+        self.client = client or httpx.AsyncClient(timeout=30, headers=headers)
 
     # ─── Helpers ──────────────────────────────────────────────────────────────
 
     async def _get(self, path: str, params: dict = {}) -> dict:
-        params = {"access_token": self.token, **params}
-        response = await self.client.get(f"{self.base_url}{path}", params=params)
-        response.raise_for_status()
-        return response.json()
+        # params = {"access_token": self.token, **params} # Removido para usar Bearer
+        try:
+            response = await self.client.get(f"{self.base_url}{path}", params=params)
+            response.raise_for_status()
+            return response.json()
+        except httpx.HTTPStatusError as e:
+            logger.error(
+                f"Erro GET {path}: {e.response.status_code} - {e.response.text}"
+            )
+            raise
 
     async def _post(self, path: str, data: dict = {}) -> dict:
-        data = {"access_token": self.token, **data}
-        response = await self.client.post(f"{self.base_url}{path}", data=data)
-        response.raise_for_status()
-        return response.json()
+        # data = {"access_token": self.token, **data} # Removido para usar Bearer
+        try:
+            response = await self.client.post(f"{self.base_url}{path}", data=data)
+            response.raise_for_status()
+            return response.json()
+        except httpx.HTTPStatusError as e:
+            logger.error(
+                f"Erro POST {path}: {e.response.status_code} - {e.response.text}"
+            )
+            raise
 
     async def _post_json(self, path: str, payload: dict) -> dict:
-        response = await self.client.post(
-            f"{self.base_url}{path}",
-            json=payload,
-            params={"access_token": self.token},
-        )
-        response.raise_for_status()
-        return response.json()
+        try:
+            response = await self.client.post(
+                f"{self.base_url}{path}",
+                json=payload,
+                # params={"access_token": self.token}, # Removido para usar Bearer
+            )
+            response.raise_for_status()
+            return response.json()
+        except httpx.HTTPStatusError as e:
+            logger.error(
+                f"Erro POST JSON {path}: {e.response.status_code} - {e.response.text}"
+            )
+            raise
 
     # ─── Graph API: Perfil ─────────────────────────────────────────────────────
 

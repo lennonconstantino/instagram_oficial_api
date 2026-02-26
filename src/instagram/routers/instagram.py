@@ -13,7 +13,7 @@ router = APIRouter(prefix="/instagram", tags=["Instagram Graph API"])
 @inject
 async def get_profile(
     ig_user_id: str,
-    service: InstagramService = Depends(Provide[Container.instagram.provided.instagram_service]),
+    service: InstagramService = Depends(Provide[Container.instagram.provided.instagram_service.call()]),
 ):
     """Retorna dados do perfil Business/Creator."""
     return await service.get_profile(ig_user_id)
@@ -25,7 +25,7 @@ async def get_media(
     ig_user_id: str,
     limit: int = Query(10, ge=1, le=50),
     after: Optional[str] = Query(None),
-    service: InstagramService = Depends(Provide[Container.instagram.provided.instagram_service]),
+    service: InstagramService = Depends(Provide[Container.instagram.provided.instagram_service.call()]),
 ):
     """Lista posts do perfil com paginação por cursor."""
     return await service.get_media(ig_user_id, limit=limit, after=after)
@@ -36,7 +36,7 @@ async def get_media(
 async def publish_media(
     ig_user_id: str,
     body: PublishMediaRequest,
-    service: InstagramService = Depends(Provide[Container.instagram.provided.instagram_service]),
+    service: InstagramService = Depends(Provide[Container.instagram.provided.instagram_service.call()]),
 ):
     """Publica uma imagem no feed via URL pública."""
     return await service.publish_image(
@@ -50,7 +50,7 @@ async def publish_media(
 @inject
 async def get_media_insights(
     media_id: str,
-    service: InstagramService = Depends(Provide[Container.instagram.provided.instagram_service]),
+    service: InstagramService = Depends(Provide[Container.instagram.provided.instagram_service.call()]),
 ):
     """Retorna métricas de um post (engajamento, impressões, alcance, salvamentos)."""
     return await service.get_media_insights(media_id)
@@ -60,7 +60,7 @@ async def get_media_insights(
 @inject
 async def get_account_insights(
     ig_user_id: str,
-    service: InstagramService = Depends(Provide[Container.instagram.provided.instagram_service]),
+    service: InstagramService = Depends(Provide[Container.instagram.provided.instagram_service.call()]),
 ):
     """Retorna métricas gerais da conta (seguidores, alcance, impressões, visualizações)."""
     return await service.get_account_insights(ig_user_id)

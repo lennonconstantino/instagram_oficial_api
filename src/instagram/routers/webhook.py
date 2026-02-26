@@ -57,9 +57,10 @@ async def verify_webhook(
 @inject
 async def receive_webhook(
     request: Request,
-    chatbot: ChatbotHandler = Depends(Provide[Container.instagram.provided.chatbot_handler]),
+    chatbot: ChatbotHandler = Depends(Provide[Container.instagram.provided.chatbot_handler.call()]),
 ):
     body = await request.body()
+    logger.info(f"Webhook payload: {body}")  # Adicione isso
 
     # Valida assinatura HMAC-SHA256
     signature = request.headers.get("X-Hub-Signature-256")
@@ -79,9 +80,17 @@ async def receive_webhook(
 
     for entry in payload.entry:
         for messaging in entry.messaging:
-            sender_id = messaging.sender.id
-
             try:
+                # Ignorar ecos da própria conta
+                if messaging.message and messaging.message.is_echo:
+                    continue
+                
+                # Ignorar eventos sem mensagem e sem postback (ex: read receipts)
+                if not messaging.message and not messaging.postback:
+                    continue
+                    
+                sender_id = messaging.sender.id
+
                 if messaging.message and messaging.message.text:
                     await chatbot.handle_message(sender_id, messaging.message.text)
 

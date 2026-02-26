@@ -83,7 +83,7 @@ class InstagramSettings(BaseSettings):
 
     @property
     def base_url(self) -> str:
-        return f"https://graph.facebook.com/{self.api_version}"
+        return f"https://graph.instagram.com/{self.api_version}"
 
     model_config = SettingsConfigDict(
         env_prefix="INSTAGRAM_",

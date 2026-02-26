@@ -56,6 +56,7 @@ class WebhookMessage(BaseModel):
     mid: str
     text: Optional[str] = None
     attachments: Optional[list[WebhookMessageAttachment]] = None
+    is_echo: Optional[bool] = None
 
 
 class WebhookPostback(BaseModel):
